@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdalign.h>
 #include <time.h>
-#include <omp.h>
 #include "df.h" // Data info
 #include "kdt.h"
 
@@ -25,7 +24,7 @@
 // ---------------
 int main(int argc, char **argv);
 void split_train_test(struct df *df, struct df *train, struct df *test, int train_p);
-void query_knn(struct df *train, struct df *test, int predicts[]);
+void query_knn(struct kdt_mem *kdt_mem, struct df *test, int predicts[]);
 float squared_dist(float a[], float b[]);
 float accuracy(struct df *test, int predicts[]);
 
