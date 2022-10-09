@@ -14,7 +14,9 @@
 // CONSTANTS
 // ---------------
 #define KDT_MEM (1024*32)
-
+#define KDT_LEFT(i) (i<<1)
+#define KDT_RIGHT(i) ((i<<1)+1)
+#define KDT_SWAP(x,y) aux = x; x = y; y = aux
 
 // ---------------
 // DECLARATIONS
@@ -25,7 +27,11 @@ inline float kdt_dist(float pixel, float npixel);
 float kdt_update_knn(float *pixels, struct kdt *currn, struct kdt **knn, float *knd, unsigned k);
 void kdt_query_knn_r(float* pixels, struct kdt *currn, struct kdt **knn, float *knd, unsigned k);
 void kdt_query_knn(float *pixels, struct kdt *root, unsigned k);
-void kdt_build(float (*pixels)[PIXELS], int size, int depth);
+void kdt_build(struct kdt_mem *mem, struct df *df);
+void kdt_build_r(struct kdt_mem *mem, struct df *df, int start, int end, int curr, int depth, int idx[]);
+void kdt_sort(struct df *df, int start, int end, int axis, int idx[]);
+
+
 
 // ---------------
 // DEFINITIONS
@@ -34,8 +40,6 @@ void kdt_build(float (*pixels)[PIXELS], int size, int depth);
 struct kdt{
     float part;
     int dim;
-    struct kdt *left;
-    struct kdt *right;
     int label;
     float pixels[PIXELS];
 };
@@ -97,5 +101,58 @@ void kdt_query_knn(float *pixels, struct kdt *root, struct kdt *knn[], unsigned 
     kdt_query_knn_r(pixels, root, knn, knd, k);
 }
 
+
+void kdt_build(struct kdt_mem *mem, struct df *df){
+	int  idx[MAX_CAPACITY], i, df_sz;
+		
+	mem->size = 0
+	i = 0;
+	df_sz = df->size;
+	for(i = 0; i<df_sz; ++i){
+		aux[i] = i;
+	}
+
+	kdt_build_r(mem, df, 0, df_sz, 0, 0, idx);
+	
+}
+
+void kdt_build_r(struct kdt_mem *mem, struct df *df, int start, int end, int curr, int depth, int idx[]){
+	int i, j, axis, median;
+	
+	if(start == end) return;
+	axis = depth % PIXELS;
+	median = (start+end)/2;
+	kdt_sort(df, start, end, axis, inx);
+	mem->size += 1;
+	i = idx[median];
+	mem->mem[curr].part = df->pixels[i][axis];
+	mem->mem[curr].dim = axis;
+	mem->mem[curr].label = df->labels[i];
+	for(j = 0; j<PIXELS; ++j){
+		mem->mem[curr].pixels[j] = df->pixels[i][j];
+	}
+	kdt_build_r(mem, df, start, median, KDT_LEFT(curr), depth+1, idx);
+	kdt_build_r(mem, df, median+1, end, KDT_RIGHT(curr), depth+1, idx);
+}
+
+void kdt_sort(struct df *df, int start, int end, int axis, int idx[]){
+	int aux, i_pivot, i, j;
+	float v_pivot;
+	if(start == end) return;
+	i_pivot = (rand()%(end-start))+start;
+	KDT_SWAP(idx[start], idx[i_pivot]);
+	v_pivot = df->pixels[idx[start]][axis];
+	i = start;
+	for(j = i + 1; j<=end; ++j){
+		if(df->pixels[idx[j]][axis] < v_pivot){
+			i += 1;
+			SWAP(idx[i], idx[j]);
+		}
+	}
+	SWAP(idx[start], idx[i]);
+
+	kdt_sort(df, start, i, axis, idx);
+	kdt_sort(df, i+1, end, axis, idx);
+}
 
 #endif
