@@ -122,7 +122,7 @@ void kdt_sort(struct df *df, int start, int end, int axis, int idx[]){
 	KDT_SWAP(idx[start], idx[i_pivot]);
 	v_pivot = df->pixels[idx[start]][axis];
 	i = start;
-	for(j = i + 1; j<=end; ++j){
+	for(j = i + 1; j<end; ++j){
 		if(df->pixels[idx[j]][axis] < v_pivot){
 			i += 1;
 			KDT_SWAP(idx[i], idx[j]);

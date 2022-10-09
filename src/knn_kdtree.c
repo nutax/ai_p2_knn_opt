@@ -103,8 +103,9 @@ void query_knn(struct kdt_mem *kdt_mem, struct df *test, int predicts[]){
     struct kdt *nn;
 
     for(i = 0; i<test->size; ++i){
+		nn = NULL;
     	kdt_query_knn(kdt_mem, test->pixels[i], &nn);
-    	predicts[i] = nn->label;
+    	if(nn != NULL) predicts[i] = nn->label;
     }
 }
 
