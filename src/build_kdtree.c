@@ -38,7 +38,7 @@ struct kdt_mem _kdt;
 int main(int argc, char **argv){
     read_df(argv[2], &_df);
     kdt_build(&_kdt, &_df);
-    write_kdtree(argv[1], &_train);
+    write_kdtree(argv[1], &_kdt);
     return 0;
 }
 

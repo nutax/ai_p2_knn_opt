@@ -23,6 +23,7 @@
 // DECLARATIONS
 // ---------------
 int main(int argc, char **argv);
+void read_kdtree(const char *path, struct kdt_mem *mem);
 void query_knn(struct kdt_mem *kdt_mem, struct df *test, int predicts[]);
 float accuracy(struct df *test, int predicts[]);
 
@@ -55,6 +56,14 @@ int main(int argc, char **argv){
     printf("Clocks: %ld\n", t);
     
     return 0;
+}
+
+void read_kdtree(const char *path, struct kdt_mem *mem){
+    FILE *file;
+    file = fopen(path, "rb");    
+    if(file == NULL){ printf("Can't open file!"); exit(1); }
+    fread(mem, sizeof(struct kdt_mem), 1, file);
+    fclose(file);
 }
 
 
