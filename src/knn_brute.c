@@ -115,7 +115,7 @@ void query_knn(struct df *train, struct df *test, int predicts[]){
     #pragma omp for
     for(i = 0; i<test_sz; ++i){
         nn = 0;
-        nd = 10000000;
+        nd = 10000;
         for(j = 0; j<train_sz; ++j){
             d = squared_dist(test_pixels[i], train_pixels[j]);
             if(d < nd){
@@ -151,13 +151,17 @@ float squared_dist(float a[], float b[]){
 
 
 float accuracy(struct df *test, int predicts[]){
-    int i, test_sz;
+    int i, test_sz, sample, equal;
     float acc;
 
     acc = 0;
     test_sz = test->size;
+    sample = 32;
     for(i = 0; i<test_sz; ++i){
-        acc += ((test->label[i]) == predicts[i]) ? 1 : 0;
+		equal = (test->label[i]) - predicts[i];
+		if(equal) equal = 0; else equal = 1;
+        acc += equal;
+        if(sample-- > 0) printf("%d == %d ? %d\n", (test->label[i]), predicts[i], equal);
     }
 
     return acc/test_sz;
