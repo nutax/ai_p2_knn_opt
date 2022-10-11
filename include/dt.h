@@ -58,9 +58,47 @@ void dt_build(struct dt_mem *mem, struct df *df){
 }
 
 void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end, int *idx){
+	int i, j, *labels, fr[LABELS], uniques, sz;
+	float avgs[PIXELS], (*pixel)[PIXELS];
+	
+	if(start >= end){
+		return;
+	}
+
+	sz = end - start;
+	
 	// Contar la cantidad de labels diferentes
+	labels = df->label;
+	for(i = 0; i<LABELS; ++i){
+		fr[i] = 0;
+	}
+	for(i = start; i<end; ++i){
+		fr[labels[idx[i]]] += 1;
+	}
+	uniques = 0;
+	for(i = 0; i<LABELS; ++i){
+		uniques += ( fr[i] > 0 );
+	}
+	
 	// Si solo hay un label, devolver
+	if(uniques < 2){
+		return;
+	}
+	
 	// Calcular la media de cada pixel
+	for(i = 0; i<PIXELS; ++i){
+		avgs[i] = 0;
+	}
+	for(i = start; i<end; ++i){
+		pixel = df->pixels[idx[i]];
+		for(j = 0; j<PIXELS; ++j){
+			avgs[j] += (*pixel)[j];
+		}
+	}
+	for(i = 0; i<PIXELS; ++i){
+		avgs[i] = avgs[i] / sz;
+	}
+	
 	// Para cada media
 		// Dividir segun si son mayores o no
 		// Calcular y guardar el gini de la división

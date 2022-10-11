@@ -17,6 +17,7 @@
 #define PIXELS 784
 #define COLS (1+PIXELS)
 #define CACHE_LINE 64
+#define LABELS 26
 
 
 
