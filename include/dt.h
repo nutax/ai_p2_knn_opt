@@ -58,10 +58,11 @@ void dt_build(struct dt_mem *mem, struct df *df){
 }
 
 void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end, int *idx){
-	int i, j, *labels, fr[LABELS], int div[LABELS][2], uniques, sz, div_sz[2], best_pixel;
+	int i, j, *labels, fr[LABELS], div[LABELS][2], uniques, sz, div_sz[2], best_pixel_split, aux;
 	float avgs[PIXELS], (*pixel)[PIXELS], gini_index[2], gini_split, best_gini_split, prob[2];
 	
 	if(start >= end){
+		mem->mem[curr].dim = -1;
 		return;
 	}
 
@@ -114,8 +115,8 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 		
 		for(j = start; j<end; ++j){
 			pixel = df->pixels[idx[j]];
-			div[labels[j]][0] += (pixels[i] < avgs[i])*1;
-			div[labels[j]][1] += (pixels[i] >= avgs[i])*1;
+			div[labels[j]][0] += (*pixel[i] < avgs[i])*1;
+			div[labels[j]][1] += (*pixel[i] >= avgs[i])*1;
 		}
 
 		gini_index[0] = 0;
@@ -154,7 +155,7 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 	i = start;
 	for(j = i + 1; j<end; ++j){
 		pixel = df->pixels[idx[j]];
-		if(pixel[best_pixel_split] < avgs[best_pixel_split]){
+		if(*pixel[best_pixel_split] < avgs[best_pixel_split]){
 			i += 1;
 			aux = idx[i];
 			idx[i] = idx[j];
