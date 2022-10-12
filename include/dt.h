@@ -59,7 +59,7 @@ void dt_build(struct dt_mem *mem, struct df *df){
 
 void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end, int *idx){
 	int i, j, *labels, fr[LABELS], int div[LABELS][2], uniques, sz, div_sz[2], best_pixel;
-	float avgs[PIXELS], (*pixel)[PIXELS], gini_index[2], gini_split, best_gini_split;
+	float avgs[PIXELS], (*pixel)[PIXELS], gini_index[2], gini_split, best_gini_split, prob[2];
 	
 	if(start >= end){
 		return;
@@ -114,8 +114,8 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 		
 		for(j = start; j<end; ++j){
 			pixel = df->pixels[idx[j]];
-			div[labels[j]][0] += (pixels[i] <= avgs[i])*1;
-			div[labels[j]][1] += (pixels[i] > avgs[i])*1;
+			div[labels[j]][0] += (pixels[i] < avgs[i])*1;
+			div[labels[j]][1] += (pixels[i] >= avgs[i])*1;
 		}
 
 		gini_index[0] = 0;
@@ -144,9 +144,32 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 			best_gini_split = gini_split;
 		}
 	}
+
+	mem->size += 1;
+	mem->mem[curr].dim = best_pixel_split;
+	mem->mem[curr].part = avgs[best_pixel_split];
+
 	
 	// Dividir segun esa media
+	i = start;
+	for(j = i + 1; j<end; ++j){
+		pixel = df->pixels[idx[j]];
+		if(pixel[best_pixel_split] < avgs[best_pixel_split]){
+			i += 1;
+			aux = idx[i];
+			idx[i] = idx[j];
+			idx[j] = aux;
+		}
+	}
+	aux = idx[i];
+	idx[i] = idx[start];
+	idx[start] = aux;
+	i += (df->pixels[idx[i]][best_pixel_split] < avgs[best_pixel_split]);
+	
+	
 	// Llamar recursivamente para cada una de las dos partes
+	dt_build_r(mem, df, DT_LEFT(curr), start, i, idx);
+	dt_build_r(mem, df, DT_RIGHT(curr), i, end, idx);
 }
 
 
