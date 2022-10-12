@@ -36,6 +36,7 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 // DEFINITIONS
 // ---------------
 struct dt{
+	int label;
 	int dim;
 	float part;
 };
@@ -62,7 +63,7 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 	float avgs[PIXELS], (*pixel)[PIXELS], gini_index[2], gini_split, best_gini_split, prob[2];
 	
 	if(start >= end){
-		mem->mem[curr].dim = -1;
+		mem->mem[curr].label = -1;
 		return;
 	}
 
@@ -83,6 +84,13 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 	
 	// Si solo hay un label, devolver
 	if(uniques < 2){
+		mem->mem[curr].label = -1;
+		for(i = 0; i<LABELS; ++i){
+			if(fr[i]){
+				mem->mem[curr].label = i;
+				break;
+			} 
+		}
 		return;
 	}
 	
@@ -147,6 +155,7 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 	}
 
 	mem->size += 1;
+	mem->mem[curr].label = -2;
 	mem->mem[curr].dim = best_pixel_split;
 	mem->mem[curr].part = avgs[best_pixel_split];
 
