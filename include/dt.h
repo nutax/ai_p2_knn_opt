@@ -58,8 +58,8 @@ void dt_build(struct dt_mem *mem, struct df *df){
 }
 
 void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end, int *idx){
-	int i, j, *labels, fr[LABELS], uniques, sz;
-	float avgs[PIXELS], (*pixel)[PIXELS];
+	int i, j, *labels, fr[LABELS], int div[LABELS][2], uniques, sz, div_sz[2], best_pixel;
+	float avgs[PIXELS], (*pixel)[PIXELS], gini_index[2], gini_split, best_gini_split;
 	
 	if(start >= end){
 		return;
@@ -99,10 +99,52 @@ void dt_build_r(struct dt_mem *mem, struct df *df, int curr, int start, int end,
 		avgs[i] = avgs[i] / sz;
 	}
 	
-	// Para cada media
+	// Para cada media (pixel)
 		// Dividir segun si son mayores o no
-		// Calcular y guardar el gini de la división
-	// Seleccionar la media con mejor gini
+		// Calcular  gini de la división
+		// Guardar si es el mejor
+	best_pixel_split = 0;
+	best_gini_split = 1000;
+	for(i = 0; i<PIXELS; ++i){
+	
+		for(j = 0; j<LABELS; ++j){
+			div[j][0] = 0;
+			div[j][1] = 0;
+		}
+		
+		for(j = start; j<end; ++j){
+			pixel = df->pixels[idx[j]];
+			div[labels[j]][0] += (pixels[i] <= avgs[i])*1;
+			div[labels[j]][1] += (pixels[i] > avgs[i])*1;
+		}
+
+		gini_index[0] = 0;
+		gini_index[1] = 0;
+		div_sz[0] = 0;
+		div_sz[1] = 0;
+		
+		for(j = 0; j<LABELS; ++j){
+			div_sz[0] += div[j][0];
+			div_sz[1] += div[j][1];
+		
+			prob[0] = div[j][0]/sz;
+			prob[1] = div[j][1]/sz;
+			
+			gini_index[0] += prob[0]*prob[0];
+			gini_index[1] += prob[1]*prob[1]; 			 
+		}
+		
+		gini_index[0] = 1 - gini_index[0];
+		gini_index[1] = 1 - gini_index[1];
+
+		gini_split = (div_sz[0]/sz)*gini_index[0] + (div_sz[1]/sz)*gini_index[1];
+
+		if(gini_split < best_gini_split){
+			best_pixel_split = i;
+			best_gini_split = gini_split;
+		}
+	}
+	
 	// Dividir segun esa media
 	// Llamar recursivamente para cada una de las dos partes
 }
